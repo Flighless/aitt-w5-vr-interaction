@@ -4,8 +4,14 @@ using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 
+
 public class HandPicker : MonoBehaviour
 {
+
+    [Header("SteamVR Setup")]
+    public SteamVR_Input_Sources handType; // Choose LeftHand or RightHand in the Inspector
+    public SteamVR_Action_Boolean grabAction; // Assign "\actions\default\in\GrabPinch" in the Inspector
+    public SteamVR_Behaviour_Pose pose; // Drag the SteamVR_Behaviour_Pose component here
 
     public GameObject thingBeingGrabbed = null;
     public GameObject hand;
@@ -29,10 +35,22 @@ public class HandPicker : MonoBehaviour
 
         if (SteamVR_Input.GetStateUp("GrabPinch", SteamVR_Input_Sources.Any))
         {
-            Rigidbody rb = thingBeingGrabbed.GetComponent<Rigidbody>();
-            rb.isKinematic = false;
+            Rigidbody toThrow = thingBeingGrabbed.GetComponent<Rigidbody>();
+            toThrow.isKinematic = false;
             thingBeingGrabbed.transform.parent = null;
+
+            Hand h = GetComponent<Hand>();
+            Vector3 velocity;
+            Vector3 angularVelocity;
+            pose.GetEstimatedPeakVelocities(out velocity, out angularVelocity);
+
+            toThrow.linearVelocity = velocity;
+            toThrow.angularVelocity = angularVelocity;
+
         }
+
+        
+
     }
 
     private void OnTriggerEnter(Collider other)
